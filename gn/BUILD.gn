@@ -40,7 +40,7 @@ config("default") {
   if (is_win) {
     cflags += [
       "/bigobj",  # Some of our files are bigger than the regular limits.
-      "/WX",  # Treat warnings as errors.
+      #"/WX",  # Treat warnings as errors.
       "/utf-8",  # Set Source and Executable character sets to UTF-8.
     ]
     if (is_clang) {
@@ -52,6 +52,13 @@ config("default") {
       "WIN32_LEAN_AND_MEAN",
       "NOMINMAX",
     ]
+
+    if(is_debug) {
+      defines += [ "_DEBUG" ]
+      cflags += [ "/MDd" ]
+    } else {
+      cflags += [ "/MD" ]
+    }
 
     if (msvc == 2015) {
       _include_dirs = [ "$win_vc/include" ]
@@ -434,8 +441,10 @@ config("debug_symbols") {
       "-funwind-tables",  # Helps make in-process backtraces fuller.
     ]
   } else if (is_win) {
-    cflags = [ "/Z7" ]
-    ldflags = [ "/DEBUG:FASTLINK" ]
+    #cflags = [ "/Z7" ]
+    cflags = [ "/Zi", "/FS" ] # generate PDB and Force Synchronous PDB Writes
+    #ldflags = [ "/DEBUG:FASTLINK" ]
+    ldflags = [ "/DEBUG:FULL" ]
     if (is_clang) {
       # /DEBUG:FASTLINK requires every object file to have standalone debug information.
       cflags += [ "-fstandalone-debug" ]
